@@ -4,25 +4,38 @@ import CategoryList from "./data/categories_list.js";
 
 
 const query = 'john wick';
-const numThreads = os.cpus().length
+//const numThreads = os.availableParallelism();
 
 
 const apiWorkerPools = {};
 
 
 for (const category of CategoryList) {
-  //apiWorkerPools[category.name] = new WorkerPool(numThreads, '../processors/category_processor.js');
   for(const api of category.apiList){
-    apiWorkerPools[api.name] = new WorkerPool(numThreads, '../processors/api_processor.js')
+    const numThreads = api.endPointNames.length < os.cpus().length ? api.endPointNames.length : os.cpus().length;
+    apiWorkerPools[api.name] = new WorkerPool(numThreads, '../processors/api_processor.js');
+    
   }
 }
 
 
-for(const pool of Object.values(apiWorkerPools)){
-    pool.on('done', ()=>{
-        pool.close();
-    })
+// Initialize the counter
+let closedPools = 0;
+
+// Loop through the worker pools and close them
+for (const pool of Object.values(apiWorkerPools)) {
+  pool.on('done', () => {
+    pool.close();
+    closedPools++;
+
+    // Check if all the pools have been closed
+    if (closedPools === Object.values(apiWorkerPools).length) {
+      // Terminate the process
+      process.exit();
+    }
+  });
 }
+
 
 for (const category of CategoryList) {
 
@@ -43,9 +56,29 @@ for (const category of CategoryList) {
     const errorHandlerName = api.errorHandlerName;
 
     const responseParserName = api.responseParserName;
+
+    const _idProps = api._idProps;
+    
+    const totalPagesGetterName = api.totalPagesGetterName;
+
+    const currentPageGetterName = api.currentPageGetterName;
   
     for(const endPointName of api.endPointNames){
-      const task = {categoryName, apiName, modulePath, endPointName, apiKey, baseUrl, query, errorHandlerName, responseParserName}
+      const task = {
+        categoryName, 
+        apiName, 
+        modulePath, 
+        endPointName, 
+        apiKey, 
+        baseUrl, 
+        query, 
+        errorHandlerName, 
+        responseParserName,
+        _idProps,
+        totalPagesGetterName,
+        currentPageGetterName
+      }
+
 
       pool.runTask(task, (err, result) => {
         if (err) {
