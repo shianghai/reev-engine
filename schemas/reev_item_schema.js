@@ -12,8 +12,9 @@ const ReevItemSchema = new Schema({
     category: String,
     sourceName: String,
     sourceUrl: String,
+    sourceEndpoint: String,
     searchPhrase: String,
-    thirdPartyInfo: {
+    itemInfo: {
         type: Schema.Types.Mixed,
         enum: [MovieSchema, ]
     }

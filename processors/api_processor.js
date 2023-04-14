@@ -5,16 +5,13 @@ import ReevItemSchema from '../schemas/reev_item_schema.js';
 import 'dotenv/config'
 import saveResponse from '../utils/mongo_utils.js';
 import PhraseCache from '../classes/phrase_cache.js';
-import PhraseCacheSchema from '../schemas/phrase_cache_schema.js';
 import { getPhraseCache } from '../utils/mongo_utils.js';
-
 
 process.on('uncaughtException', (err) => {
        console.error(`Uncaught exception in worker thread: ${err}`);
        parentPort.postMessage(err);
 });
  
-
 
 if (!isMainThread) {
   parentPort.on('message', async (task) => {
@@ -39,6 +36,8 @@ if (!isMainThread) {
       category: categoryName,
       sourceName: apiName,
       sourceUrl: baseUrl,
+      sourceEndpoint: endPointName,
+      searchPhrase: query,
     }
 
     const apiModule = await import(modulePath);
@@ -47,8 +46,9 @@ if (!isMainThread) {
     const mongooseConnection = mongoose.createConnection(process.env.MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      maxPoolSize: 4,
     });
-    const ReevModel  = mongooseConnection.model('ReevItem', ReevItemSchema);
+    const ReevItem  = mongooseConnection.model('ReevItem', ReevItemSchema);
 
     //initialise cache
     const phraseCacheInstance = new PhraseCache(query, endPointName);
@@ -71,8 +71,18 @@ if (!isMainThread) {
 
     async function responseListener(data) {
       //save response to db;
-      if(data) await saveResponse(data, ReevModel, _idProps, dbItemProps, phraseCacheInstance);
+      
+      if(data) {
+        try{
+          await saveResponse(data, ReevItem, _idProps, dbItemProps, phraseCacheInstance);
+
+        }
+        catch(error){
+          
+         throw error;
+        }
     } 
+  }
     
     function doneListener(){
       parentPort.postMessage('completed sucessfully');
@@ -80,14 +90,13 @@ if (!isMainThread) {
     }
     try {
       //get cache
-      const cache = await getPhraseCache(phraseCacheInstance, endPointName);
-      console.log('phrase cache', cache);
-      const lastPageQueried = cache.cachedEndpoints.get(endPointName).lastPageQueried;
+      const cache = await getPhraseCache(phraseCacheInstance, endPointName, apiName, query);
+      const lastPageQueried = cache.cachedPhrases.get(query).lastPageQueried;
       await endPointHandler.handleRequestMethod(lastPageQueried + 1);
        
     } catch (error) {
-       parentPort.postMessage({ error: error.message });
-       parentPort.close();      
+      parentPort.postMessage({err: error.message});
+      throw error;        
     }
   });
 

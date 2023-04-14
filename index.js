@@ -84,7 +84,7 @@ for (const category of CategoryList) {
         if (err) {
           console.error(`Error processing task: ${err}`);
         } else {
-          console.log(`Result for task ${JSON.stringify(task)}: ${JSON.stringify(result)}`);
+          console.log(`\n Result for task ${JSON.stringify(task)}: ${JSON.stringify(result)}`);
         }
       });
     }    

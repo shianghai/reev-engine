@@ -16,18 +16,18 @@ export default class PhraseCache{
     }
     
   
-    async getCache(){
-        try{
-            const cache = await this.phraseCacheModel.findOne({id: this.searchPhrase}).exec()
-            if(cache) return cache            
-            else return null;
+    async getCache(endPointId){
+        try {
+          const cache = await this.phraseCacheModel
+            .findOne({ endPointId: endPointId })
+            .maxTimeMS(30000) // set maxTimeMS to 30 seconds //TODO: optimize this later
+            .exec();
+            return cache;
+        } catch (error) {
+          throw error;
         }
-        catch(error){
-            throw error;
-        };
-        
-        
-    }
+      } 
+      
 
     /**
      * @method setCache saves the current state of an endpoint with respect to the search phrase
@@ -35,9 +35,11 @@ export default class PhraseCache{
      */
     async saveCache(cache){
         try{
-            const savedCache = await this.phraseCacheModel.findOneAndUpdate({id: cache.id}, cache, {
+            const savedCache = await this.phraseCacheModel.findOneAndUpdate({endPointId: cache.endPointId}, cache, {
                 upsert: true,
-            });
+            })
+            .maxTimeMS(30000)
+            .exec()
             
             return savedCache;
         }

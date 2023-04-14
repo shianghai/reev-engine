@@ -12,20 +12,22 @@ class Tmdb extends BaseApi{
     }
 
     handleTmdbError(error){
-            switch(error.status_code){
-                case 7:
-                    //handle "Invalid API key: You must be granted a valid key." error,
-                    console.error(`Tmdb api error: ${error.status_message}`);
-                    break;
-                case 34:
-                    // handle "The resource you requested could not be found.", error
-                    console.error(`Tmdb api error: ${error.status_message}`);
-                    break;
-                default: break;
+            if(error.status_code){
+                switch(error.status_code){
+                    case 7:
+                        //handle "Invalid API key: You must be granted a valid key." error,
+                        console.error(`Tmdb api error: ${error.status_message}`);
+                        break;
+                    case 34:
+                        // handle "The resource you requested could not be found.", error
+                        console.error(`Tmdb api error: ${error.status_message}`);
+                        break;
+                    default: break;
+                }
             }
     }
 
-    async searchMovie(){
+    async searchMovie(page){
         try {
             const url = `/search/movie?api_key=${this.apiKey}&language=en-US&query=${this.query}&page=${page}&include_adult=false`;
             const response = await super.makeRequest(url);
@@ -72,6 +74,7 @@ class Tmdb extends BaseApi{
     }
 
     parseTmdbResponse(response){
+        
         //all api responses objects must have total page, results, total results and page fields
         if(response.results.length === 0){
             //if the response is empty, return an empty array

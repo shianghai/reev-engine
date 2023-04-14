@@ -1,26 +1,24 @@
 import { Schema } from "mongoose";
 
-const EndpointCacheInfo = new Schema({
+const CachedPhraseSchema = new Schema({
     lastPageQueried: {
         type: Number,
         required: true
     },
-    endPointName: String,
-    lastQueryDate: Date,
     totalPages: Number,
-    apiName: String
+    lastQueryDate: Date,
 })
 
 const PhraseCacheSchema = new Schema({
-    id: {
+    endPointId: {
         type: String,
         unique: true
     },
-    text: String,
-    cachedEndpoints: {
+    cachedPhrases: {
         type: Map,
-        of: EndpointCacheInfo,
-    }
+        of: CachedPhraseSchema,
+    },
+    apiName: String,
     
 });
 

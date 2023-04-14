@@ -41,14 +41,15 @@ export default class EndPointHandler extends EventEmitter{
                     totalPages = this.apiInstance[this.totalPagesGetterName](response.data)
                 }
 
-                if(response.status === 404) throw response.data;
+                else if(response.status === 404) throw response.data;
 
-                if( response.status === 408 || response.status === 429 || 
+                else if( response.status === 408 || response.status === 429 || 
                     response.status === 500 || response.status === 502 ||  
                     response.status === 503
                 )
                 {
                     try{
+                        console.log('\n response gotten from initial retry', response);
                         const response = await retryWithBackoff(()=>this.apiInstance[this.endpointName](pageNumber));
                         if(response.data){
                             this.responseEmitter(response.data);
@@ -60,16 +61,21 @@ export default class EndPointHandler extends EventEmitter{
                     }
                         
                 }
+                else{
+                    throw response.data;
+                }
             }
             catch(error){
-                if(error.name === 'AxiosError'){
+                
+                if(error.request){
+                    //errors from the request side
+                    // if(this.errorHandlerName){
+                    //     this.apiInstance[this.errorHandlerName](error.request.data);
+                    // } 
                     
-                    console.error(new AxiosError("axios error:"+ error.message));
+                    console.log('No response handler provided to handle the request error: ', error.response);
                     
-                }
-                else if(error.request){
-                    //errors from the request site
-                    console.log('request error: ', error.request);
+                    
                 }
                 else if(error.response){
                     //response errors
@@ -84,7 +90,7 @@ export default class EndPointHandler extends EventEmitter{
             
                 
             }
-            //recursively call the handle request method if page number does not exceed total page number for the search phrase
+            pageNumber++;
             if(pageNumber > totalPages){
                 hasNextPage = false;
                 this.emit('done');
@@ -96,8 +102,7 @@ export default class EndPointHandler extends EventEmitter{
 
     async responseEmitter(response){
         const parsedResponse = this.apiInstance[this.responseParserName](response);
-        this.emit('data', parsedResponse);
-        
+        if(parsedResponse) this.emit('data', parsedResponse);
     }
 
     
