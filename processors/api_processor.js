@@ -1,11 +1,10 @@
-import { isMainThread, parentPort } from 'node:worker_threads';
+import { isMainThread, parentPort, threadId } from 'node:worker_threads';
 import EndPointHandler from '../classes/end_point_handler.js';
-import mongoose from 'mongoose';
-import ReevItemSchema from '../schemas/reev_item_schema.js';
 import 'dotenv/config'
 import saveResponse from '../utils/mongo_utils.js';
 import PhraseCache from '../classes/phrase_cache.js';
 import { getPhraseCache } from '../utils/mongo_utils.js';
+import ReevItemSchema, { MongooseConnection, } from '../schemas/reev_item_schema.js';
 
 process.on('uncaughtException', (err) => {
        console.error(`Uncaught exception in worker thread: ${err}`);
@@ -42,13 +41,7 @@ if (!isMainThread) {
 
     const apiModule = await import(modulePath);
     const Api  = apiModule.default;
-
-    const mongooseConnection = mongoose.createConnection(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      maxPoolSize: 4,
-    });
-    const ReevItem  = mongooseConnection.model('ReevItem', ReevItemSchema);
+    
 
     //initialise cache
     const phraseCacheInstance = new PhraseCache(query, endPointName);
@@ -60,33 +53,30 @@ if (!isMainThread) {
     const endPointHandler = new EndPointHandler(apiInstance, endPointName, errorHandlerName, responseParserName, totalPagesGetterName, currentPageGetterName, responseListener, doneListener);
 
     //listen for requests
-    endPointHandler.on('data', async(data) => {
-      await responseListener(data)
-    });
-
-    endPointHandler.once('done', ()=>{
-      doneListener();
-    })
-
-
+   
     async function responseListener(data) {
       //save response to db;
       
       if(data) {
         try{
-          await saveResponse(data, ReevItem, _idProps, dbItemProps, phraseCacheInstance);
-
+          const {current_page, total_pages} = await saveResponse(data, ReevItemSchema, MongooseConnection, _idProps, dbItemProps, phraseCacheInstance);
+          if(current_page){
+            //might create specific saving status codes to be handled by the 'saved' event handler
+            endPointHandler.emit('saved', current_page, total_pages)
+          }
         }
         catch(error){
-          
-         throw error;
+          console.log('error', error)
+          throw error;
+
         }
     } 
   }
-    
+
     function doneListener(){
       parentPort.postMessage('completed sucessfully');
       parentPort.close();
+      parentPort.emit('exit')     
     }
     try {
       //get cache

@@ -22,17 +22,22 @@ class Tmdb extends BaseApi{
                         // handle "The resource you requested could not be found.", error
                         console.error(`Tmdb api error: ${error.status_message}`);
                         break;
-                    default: break;
+                    case 22: 
+                        console.error(`Tmdb Api Error: ${error.status_message}`);
+                        break;
+                    default: 
+                        console.error(`Tmdb Api Error: ${error}`)
+                        break;
                 }
             }
     }
 
     async searchMovie(page){
+
         try {
             const url = `/search/movie?api_key=${this.apiKey}&language=en-US&query=${this.query}&page=${page}&include_adult=false`;
             const response = await super.makeRequest(url);
-            return response;
-            
+            return response;            
         }
         catch(error){
             //throw the error which will be caught by the caller who then passes the error to handleError method
@@ -74,7 +79,6 @@ class Tmdb extends BaseApi{
     }
 
     parseTmdbResponse(response){
-        
         //all api responses objects must have total page, results, total results and page fields
         if(response.results.length === 0){
             //if the response is empty, return an empty array
@@ -83,7 +87,8 @@ class Tmdb extends BaseApi{
         else {
             return {
                 results: response.results,
-                page: response.page,
+                currentPage: response.page,
+                totalPages: this.getTotalPagesNumber(response)
             }
         }
     }
@@ -99,7 +104,7 @@ class Tmdb extends BaseApi{
         if(response){
             return response.total_pages;
         }
-        else return null;
+        else return 5;
     }
 }
 

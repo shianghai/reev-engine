@@ -1,31 +1,46 @@
-
+import mongoose from "mongoose";
 
 /**
  * Saves an object to the to the mongodb database
  * @param {Object} data the response recieved in the response listener. contains the results array and page number 
- * @param {ReevItemSchema} model the model used for the saving of the results to the database 
+ * @param {ReevItemSchema} schema the schema used for the saving of the results to the database 
  * @param {Object} _idProps the fields which will be used to construct the id of each reevItem
  * @param {Object} dbItemProps the additional properties that are added to the reev item
  * @param {Class} cacheInstance an instance of PhraseCache class. Used for saving and getting a cache for using the search phrase
  */
-async function saveResponse(data, model, _idProps, dbItemProps, cacheInstance){
+async function saveResponse(data, schema, connection,  _idProps, dbItemProps, cacheInstance,){
+
     if(Array.isArray(data.results)){
+      let current_page = data.currentPage
+      let total_pages = data.totalPages
+      let model;
       for(const value of data.results){
+        if(mongoose.models.reevitem){
+          model = mongoose.model('reevitems')
+        }
+        else {
+          model = mongoose.model('reevitems', schema);
+        }
+        
         const id = constructId({...value, ...dbItemProps}, _idProps);
         const newReevItem = new model({
-            id: id,
+            id,
           ...dbItemProps, 
           itemInfo: {...value}
-        });      
+        }); 
+          
         try{
-              const savedReevItem = await newReevItem.save();           
-              console.log("savedReevItem: ", savedReevItem.searchPhrase);           
-              // const cache = await cacheInstance.getCache(savedReevItem.sourceEndpoint);  
-              // const updatedCache = cache.cachedPhrases.set(savedReevItem.searchPhrase, {
-              //     lastPageQueried: data.page,
-              //     lastQueryDate: Date.now(),
-              // });
-              // await cacheInstance.saveCache(updatedCache);
+              
+                const savedReevItem = await newReevItem.save();           
+                //console.log("savedReevItem: ", savedReevItem.searchPhrase);           
+                const cache = await cacheInstance.getCache(savedReevItem.sourceEndpoint);
+                cache.cachedPhrases.set(savedReevItem.searchPhrase, {
+                    lastPageQueried: data.currentPage,
+                    lastQueryDate: Date.now(),
+                    totalPages: data.totalPages
+                });
+                
+                await cacheInstance.saveCache(cache);              
         }
         catch(err){
           if(err.code === 11000 ){
@@ -36,15 +51,20 @@ async function saveResponse(data, model, _idProps, dbItemProps, cacheInstance){
             });
             const tempData = {...data, results: newData}
             if(newData.length){
-              await saveResponse(tempData, model, _idProps, dbItemProps, cacheInstance)
+              await saveResponse(tempData, schema, connection, _idProps, dbItemProps, cacheInstance)
             }
           }
           else{
+            console.log("errorrrr: ", err)
             throw err;
           }
-        };
+        
+        }
       }
-    }
+
+      return {current_page, total_pages}
+    }   
+    
   }
 
 
@@ -67,14 +87,14 @@ async function saveResponse(data, model, _idProps, dbItemProps, cacheInstance){
             resultCache = cache;         
           }
           else {
-              const updatedCache = tempCache.cachedPhrases.set(searchPhrase, {
+              tempCache.cachedPhrases.set(searchPhrase, {
                 lastPageQueried: 0,
                 totalPages,
                 lastQueryDate: Date.now(),
               });
           
               //update existing cache with the endpoint details
-              const savedCache = await cacheInstance.saveCache(updatedCache);
+              const savedCache = await cacheInstance.saveCache(tempCache);
               resultCache = savedCache
           }
                 

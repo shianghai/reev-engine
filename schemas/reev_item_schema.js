@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { MovieSchema } from "./category_schemas.js";
 
+
 const {Schema} = mongoose;
 //add more schema fields
 
@@ -23,4 +24,14 @@ const ReevItemSchema = new Schema({
     
 });
 
+const MongooseConnection = mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    maxPoolSize: 100,
+    
+  });
+
+
+
+export {MongooseConnection}
 export default ReevItemSchema;

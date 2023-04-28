@@ -34,6 +34,7 @@ export default class PhraseCache{
      * @param {int} pageNumber  the latest page that has been processed by the endpoint with regards to the searchPhrase
      */
     async saveCache(cache){
+        console.log(cache)
         try{
             const savedCache = await this.phraseCacheModel.findOneAndUpdate({endPointId: cache.endPointId}, cache, {
                 upsert: true,

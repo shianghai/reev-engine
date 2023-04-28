@@ -19,22 +19,24 @@ for (const category of CategoryList) {
 }
 
 
-// Initialize the counter
-let closedPools = 0;
+// // Initialize the counter
+// let closedPools = 0;
 
-// Loop through the worker pools and close them
-for (const pool of Object.values(apiWorkerPools)) {
-  pool.on('done', () => {
-    pool.close();
-    closedPools++;
+// // Loop through the worker pools and close them
+// for (const pool of Object.values(apiWorkerPools)) {
+//   pool.on('done', () => {
+//     console.log(`pool ${pool} done `)
+//     pool.close();
+//     closedPools++;
 
-    // Check if all the pools have been closed
-    if (closedPools === Object.values(apiWorkerPools).length) {
-      // Terminate the process
-      process.exit();
-    }
-  });
-}
+//     // Check if all the pools have been closed
+//     if (closedPools === Object.values(apiWorkerPools).length) {
+//       console.log("all tasks completed")
+//       // Terminate the process
+//       process.exit();
+//     }
+//   });
+// }
 
 
 for (const category of CategoryList) {
@@ -85,6 +87,7 @@ for (const category of CategoryList) {
           console.error(`Error processing task: ${err}`);
         } else {
           console.log(`\n Result for task ${JSON.stringify(task)}: ${JSON.stringify(result)}`);
+          process.exit(0)
         }
       });
     }    
