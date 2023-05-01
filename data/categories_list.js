@@ -13,8 +13,15 @@ const CategoryList = [
                 responseParserName: 'parseTmdbResponse',
                 totalPagesGetterName: 'getTotalPagesNumber',
                 currentPageGetterName: 'getCurrentPageNumber',
+                schemaMapper: [{poster_url: 'poster_path'}, {adult: 'adult'},{overview: 'overview'},{release_date: 'release_date'},{genres: 'genre_ids'},{id: 'id'},
+                    {media_type: 'media_type'},{title: 'title'},{rating_count: 'vote_count'},{video: 'video'},{language: 'original_language'},{ rating: 'vote_average'},]
                               
             },
+            // {
+            //     name: 'Google',
+            //     apiKey: 'AIzaSyA5Tfxl_yQcrbpjmq95NskuKFGDAjTB5Qg',
+            //     _idProps: ['']
+            // }
 
         ]
     }

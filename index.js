@@ -64,6 +64,7 @@ for (const category of CategoryList) {
     const totalPagesGetterName = api.totalPagesGetterName;
 
     const currentPageGetterName = api.currentPageGetterName;
+    const schemaMapper = api.schemaMapper;
   
     for(const endPointName of api.endPointNames){
       const task = {
@@ -78,8 +79,10 @@ for (const category of CategoryList) {
         responseParserName,
         _idProps,
         totalPagesGetterName,
-        currentPageGetterName
+        currentPageGetterName,
+        schemaMapper
       }
+
 
 
       pool.runTask(task, (err, result) => {
@@ -87,7 +90,7 @@ for (const category of CategoryList) {
           console.error(`Error processing task: ${err}`);
         } else {
           console.log(`\n Result for task ${JSON.stringify(task)}: ${JSON.stringify(result)}`);
-          process.exit(0)
+          //process.exit(0)
         }
       });
     }    

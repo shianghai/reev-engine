@@ -81,8 +81,8 @@ async function saveResponse(data, schema, connection,  _idProps, dbItemProps, ca
       const cache = await cacheInstance.getCache(endPointName);     
         if(cache != null){
           let tempCache = cache;
-          const cachedPhrase = cache.cachedPhrases.get(searchPhrase);
-          if(cachedPhrase){
+          const cachedPhrase = cache?.cachedPhrases.get(searchPhrase);
+          if(cachedPhrase !== undefined){
             //check if phrase already exists in the cached endpoints
             resultCache = cache;         
           }

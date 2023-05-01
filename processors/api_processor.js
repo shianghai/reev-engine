@@ -26,7 +26,8 @@ if (!isMainThread) {
       responseParserName,
       _idProps,
       totalPagesGetterName,
-      currentPageGetterName
+      currentPageGetterName,
+      schemaMapper
     } = task;
 
     
@@ -50,7 +51,7 @@ if (!isMainThread) {
     const apiInstance = new Api(apiKey, baseUrl, query);
 
     //initialise endpoint handler
-    const endPointHandler = new EndPointHandler(apiInstance, endPointName, errorHandlerName, responseParserName, totalPagesGetterName, currentPageGetterName, responseListener, doneListener);
+    const endPointHandler = new EndPointHandler(apiInstance, endPointName, errorHandlerName, responseParserName, totalPagesGetterName, currentPageGetterName, schemaMapper, responseListener, doneListener);
 
     //listen for requests
    
@@ -76,17 +77,27 @@ if (!isMainThread) {
     function doneListener(){
       parentPort.postMessage('completed sucessfully');
       parentPort.close();
-      parentPort.emit('exit')     
+           
     }
     try {
       //get cache
       const cache = await getPhraseCache(phraseCacheInstance, endPointName, apiName, query);
-      const lastPageQueried = cache.cachedPhrases.get(query).lastPageQueried;
-      await endPointHandler.handleRequestMethod(lastPageQueried + 1);
+      const lastPageQueried = cache?.cachedPhrases.get(query).lastPageQueried;
+      const totalPages = cache?.cachedPhrases.get(query).totalPages || 5;
+      if(lastPageQueried !== undefined){
+        await endPointHandler.handleRequestMethod(lastPageQueried + 1, totalPages);
+      }
+
+      else{
+        await endPointHandler.handleRequestMethod(1, totalPages);
+      }
+      
        
     } catch (error) {
       parentPort.postMessage({err: error.message});
-      throw error;        
+      parentPort.close();
+      throw error;
+              
     }
   });
 
