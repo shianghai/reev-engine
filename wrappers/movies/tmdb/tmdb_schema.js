@@ -46,7 +46,6 @@ TmdbMongoConnection.model('TmdbTvShowSchema', TmdbTvShowSchema);
 TmdbMongoConnection.model('TmdbPeopleSchema', TmdbPeopleSchema);
 
 
-
 export default TmdbMongoConnection;
 export {
     TmdbMovieSchema,

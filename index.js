@@ -1,16 +1,16 @@
 import WorkerPool from "./classes/worker_pool.js";
 import os from 'node:os';
-import CategoryList from "./data/categories_list.js";
+import APICategories from "./data/api_categories.js";
 
 
-const query = 'john wick';
+const query = 'avatar';
 //const numThreads = os.availableParallelism();
 
 
 const apiWorkerPools = {};
 
 
-for (const category of CategoryList) {
+for (const category of APICategories) {
   for(const api of category.apiList){
     const numThreads = api.endPointNames.length < os.cpus().length ? api.endPointNames.length : os.cpus().length;
     apiWorkerPools[api.name] = new WorkerPool(numThreads, '../processors/api_processor.js');
@@ -39,7 +39,7 @@ for (const category of CategoryList) {
 // }
 
 
-for (const category of CategoryList) {
+for (const category of APICategories) {
 
   const categoryName = category.name;
 

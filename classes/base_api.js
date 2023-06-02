@@ -1,5 +1,12 @@
 import axios from "axios";
 
+
+
+/**
+ * @class BaseApi - The base class for all API wrappers.
+ * @param {string} baseURL - The base URL for the API.
+ * @param {Object} headers - The headers for the API.
+ */
 class BaseApi {
   constructor(baseURL, headers = {}) {
     this.client = axios.create({

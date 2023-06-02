@@ -4,9 +4,9 @@ import mongoose from "mongoose";
  * Saves an object to the to the mongodb database
  * @param {Object} data the response recieved in the response listener. contains the results array and page number 
  * @param {ReevItemSchema} schema the schema used for the saving of the results to the database 
- * @param {Object} _idProps the fields which will be used to construct the id of each reevItem
- * @param {Object} dbItemProps the additional properties that are added to the reev item
- * @param {Class} cacheInstance an instance of PhraseCache class. Used for saving and getting a cache for using the search phrase
+ * @param {Object} _idProps the fields which will be used to construct the id of each database item
+ * @param {Object} dbItemProps the additional properties that are added to the database item
+ * @param {Class} cacheInstance an instance of PhraseCache class. Used for saving and getting a cache from the database
  */
 async function saveResponse(data, schema, connection,  _idProps, dbItemProps, cacheInstance,){
 
@@ -29,8 +29,7 @@ async function saveResponse(data, schema, connection,  _idProps, dbItemProps, ca
           itemInfo: {...value}
         }); 
           
-        try{
-              
+        try{           
                 const savedReevItem = await newReevItem.save();           
                 //console.log("savedReevItem: ", savedReevItem.searchPhrase);           
                 const cache = await cacheInstance.getCache(savedReevItem.sourceEndpoint);
@@ -70,7 +69,7 @@ async function saveResponse(data, schema, connection,  _idProps, dbItemProps, ca
 
 /** 
  * 
- * @param {} cacheInstance an instance of PhraseCache class initialised with the searchPhrase and the endpointName. Used for saving and getting a cache for in the database
+ * @param {} cacheInstance an instance of PhraseCache class initialised with the searchPhrase and the endpointName. Used for saving and getting a cache in the database
  * @param {String} endPointName the name of the endpoint to use for the cache fething
  * @returns {Object} retrieved cache from the database or a newly saved one if there was no previous one
  */
@@ -89,7 +88,7 @@ async function saveResponse(data, schema, connection,  _idProps, dbItemProps, ca
           else {
               tempCache.cachedPhrases.set(searchPhrase, {
                 lastPageQueried: 0,
-                totalPages,
+                totalPages: 1,
                 lastQueryDate: Date.now(),
               });
           
@@ -126,7 +125,7 @@ async function saveResponse(data, schema, connection,  _idProps, dbItemProps, ca
   }
 
   /**
-   * 
+   * Construct a stringified object from @param data based on @param _idProps which will be used as a unique id in saving to the database
    * @param {Object} data a response object gotten from an enpoint query
    * @param {Object} _idProps contains the keys that would be used to get the required get the required fields to construct the id
    * @returns 

@@ -102,7 +102,6 @@ class Tmdb extends BaseApi{
         try{
             const url = `/genre/movie/list?api_key=${this.apiKey}&language=en-US`
             const response = await super.makeRequest(url);
-            console.log('genre response', response)
             return response.data.genres;
         }
         catch(e){
@@ -140,8 +139,6 @@ class Tmdb extends BaseApi{
                 }, {});
                 const genreNames = genre_ids.map(genre_id => genre_dict[genre_id]);
                 resultObj['genres'] = genreNames;
-
-           
             }
             result.push(resultObj);
         });

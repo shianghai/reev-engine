@@ -1,7 +1,7 @@
 /**
- * 
+ * Get the data from the API response and parse it to the corresponding schema
  * @param {Array | Object} data The data which needs to be parsed to the corresponding schema
- * @param {*} schemaMapper The array of key-value pairs where the key is the property name of the schema and the value being the property name of the item in the data
+ * @param {object} schemaMapper The array of key-value pairs where the key is the property name of the schema and the value being the property name of the item in the data
  */
 export function GetSchemaData(data, schemaMapper){
     let result = [];
@@ -12,8 +12,7 @@ export function GetSchemaData(data, schemaMapper){
     if(Array.isArray(data)){
         data.map((dataObject, index)=>{
             let newDataObj = {};
-            schemaMapper.forEach(schemaPropObject  => {
-                
+            schemaMapper.forEach(schemaPropObject  => {               
                 const schemaKey = Object.keys(schemaPropObject)[0];
                 const schemaValue = dataObject[schemaPropObject[schemaKey]];
                 if(!schemaValue){

@@ -7,7 +7,7 @@ import { getPhraseCache } from '../utils/mongo_utils.js';
 import ReevItemSchema, { MongooseConnection, } from '../schemas/reev_item_schema.js';
 
 process.on('uncaughtException', (err) => {
-       console.error(`Uncaught exception in worker thread: ${err}`);
+       console.error(`Uncaught exception in worker thread: ${err.stack}`);
        parentPort.postMessage(err);
 });
  
@@ -40,6 +40,7 @@ if (!isMainThread) {
       searchPhrase: query,
     }
 
+    //import api module
     const apiModule = await import(modulePath);
     const Api  = apiModule.default;
     
@@ -53,8 +54,7 @@ if (!isMainThread) {
     //initialise endpoint handler
     const endPointHandler = new EndPointHandler(apiInstance, endPointName, errorHandlerName, responseParserName, totalPagesGetterName, currentPageGetterName, schemaMapper, responseListener, doneListener);
 
-    //listen for requests
-   
+    //listen for responses from endpoint handler
     async function responseListener(data) {
       //save response to db;
       
@@ -79,17 +79,20 @@ if (!isMainThread) {
       parentPort.close();
            
     }
+
     try {
       //get cache
       const cache = await getPhraseCache(phraseCacheInstance, endPointName, apiName, query);
       const lastPageQueried = cache?.cachedPhrases.get(query).lastPageQueried;
+      console.log('lastPageQueried', lastPageQueried)
       const totalPages = cache?.cachedPhrases.get(query).totalPages || 5;
-      if(lastPageQueried !== undefined){
+      console.log('totalPages', totalPages)
+      if(lastPageQueried !== 'undefined'){
         await endPointHandler.handleRequestMethod(lastPageQueried + 1, totalPages);
       }
 
       else{
-        await endPointHandler.handleRequestMethod(1, totalPages);
+        await endPointHandler.handleRequestMethod(1, totalPages || 5);
       }
       
        
