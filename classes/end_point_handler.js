@@ -5,7 +5,7 @@ import retryWithBackoff from "../utils/axios_utils.js";
 
 export default class EndPointHandler extends EventEmitter{
     
-    constructor(apiInstance, endpointName, errorHandlerName, responseParserName, totalPagesGetterName, currentPageGetterName, schemaMapper, responseListener, doneListener){
+    constructor(apiInstance, endpointName, errorHandlerName, responseParserName, totalPagesGetterName, currentPageGetterName, responseListener, doneListener){
         super(); 
         
         if(arguments.length === 2){
@@ -21,12 +21,11 @@ export default class EndPointHandler extends EventEmitter{
             this.doneListener = doneListener;
             this.totalPagesGetterName = totalPagesGetterName;
             this.currentPageGetterName = currentPageGetterName;
-            this.schemaMapper = schemaMapper;
+
             
 
-            this.savedListener = function(currentPage, totalPages){
-                //increase the page count and make the request again
-                this.handleRequestMethod(currentPage + 1, totalPages)
+            this.savedListener = function(nextPage, totalPages){
+                this.handleRequestMethod(nextPage, totalPages)
             }
 
         }
@@ -80,7 +79,7 @@ export default class EndPointHandler extends EventEmitter{
                 catch(error){
                     
                     if(error.request){         
-                        console.log('Axios Error:', error.code, error.message);  
+                        console.log("\x1b[31m%s\x1b[0m", `${error.code, error}`, );  
                         this.emit('done')
                                    
                     }
@@ -110,12 +109,10 @@ export default class EndPointHandler extends EventEmitter{
     async responseEmitter(response){
         
         try{
-            const parsedResponse = await this.apiInstance[this.responseParserName](response, this.schemaMapper);
-            console.log('parsedResponse', ...parsedResponse.results)
-            if(parsedResponse) this.emit('data', parsedResponse);
+           this.emit('data', response);
         }
         catch(error){
-            console.log("parse error: ", err)
+            console.log("emit error: ", err)
         }
         
 

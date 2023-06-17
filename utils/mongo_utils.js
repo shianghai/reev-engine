@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { GetSchemaData } from "./schema_utils.js";
 
 /**
  * Saves an object to the to the mongodb database
@@ -8,7 +9,7 @@ import mongoose from "mongoose";
  * @param {Object} dbItemProps the additional properties that are added to the database item
  * @param {Class} cacheInstance an instance of PhraseCache class. Used for saving and getting a cache from the database
  */
-async function saveResponse(data, schema, connection,  _idProps, dbItemProps, cacheInstance,){
+async function saveResponse(data, schema, connection,  _idProps, dbItemProps, cacheInstance, schemaMapper){
 
     if(Array.isArray(data.results)){
       let current_page = data.currentPage
@@ -21,12 +22,12 @@ async function saveResponse(data, schema, connection,  _idProps, dbItemProps, ca
         else {
           model = mongoose.model('reevitems', schema);
         }
-        
+        const schemaData = GetSchemaData(value, schemaMapper);
         const id = constructId({...value, ...dbItemProps}, _idProps);
         const newReevItem = new model({
             id,
           ...dbItemProps, 
-          itemInfo: {...value}
+          itemInfo: {...schemaData}
         }); 
           
         try{           
@@ -143,5 +144,6 @@ async function saveResponse(data, schema, connection,  _idProps, dbItemProps, ca
   export function desctructId(id){
     return JSON.parse(id);
   }
+
 
   export default saveResponse

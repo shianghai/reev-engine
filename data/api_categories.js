@@ -48,42 +48,45 @@
 */
 
 const APICategories = [
-    {
-        name: 'movies',
-        apiList: [
-            {
-                name: 'Tmdb',              
-                apiKey: process.env.TMDB_API_KEY,
-                baseUrl: 'https://api.themoviedb.org/3',
-                _idProps: ['title', 'id', 'category', 'source'],
-                modulePath: '../wrappers/movies/tmdb/tmdb.js',
-                endPointNames: ['searchMovie', 'searchTvShow', 'searchPeople',],
-                errorHandlerName: 'handleTmdbError',
-                responseParserName: 'parseTmdbResponse',
-                totalPagesGetterName: 'getTotalPagesNumber',
-                currentPageGetterName: 'getCurrentPageNumber',
-                schemaMapper: [{poster_url: 'poster_path'}, {adult: 'adult'},{overview: 'overview'},{release_date: 'release_date'},{genres: 'genre_ids'},{id: 'id'},
-                    {media_type: 'media_type'},{title: 'title'},{rating_count: 'vote_count'},{video: 'video'},{language: 'original_language'},{ rating: 'vote_average'},]
+    // {
+    //     name: 'movies',
+    //     apiList: [
+    //         {
+    
+    //             name: 'Tmdb',
+    //             apiKey: "bf033f5de51a929c626fe72f84ffb84d",
+    //             baseUrl: 'https://api.themoviedb.org/3',
+    //             _idProps: ['title', 'id', 'category', 'source'],
+    //             modulePath: '../wrappers/movies/tmdb/tmdb.js',
+    //             endPointNames: ['searchMovie', 'searchTvShow', 'searchPeople',],
+    //             errorHandlerName: 'handleTmdbError',
+    //             responseParserName: 'parseTmdbResponse',
+    //             totalPagesGetterName: 'getTotalPagesNumber',
+    //             currentPageGetterName: 'getCurrentPageNumber',
+    //             schemaMapper: [{image_url: 'poster_path'}, {is_adult: 'adult'},{description: 'overview'},{release_date: 'release_date'},{genres: 'genre_ids'},{id: 'id'},
+    //                 {media_type: 'media_type'},{title: 'title'},{rating_count: 'vote_count'},{has_video: 'video'},{language: 'original_language'},{ rating: 'vote_average'},]
                               
-            },
-        ]
-    },
+    //         },
+    //     ]
+    // },
     {
         name: 'Google',
         apiList: [
-            {              
-                name: 'Google Movie Search',
-                apiKey: process.env.GOOGLE_CUSTOM_SEARCH_API_KEY,
-                baseUrl: 'https://www.googleapis.com/customsearch/v1?',
+            {    
+                          
+                name: 'Google Search',
+                apiKey: "AIzaSyA5Tfxl_yQcrbpjmq95NskuKFGDAjTB5Qg",
+                baseUrl: 'https://customsearch.googleapis.com/',
                 modulePath: '../wrappers/google/google.js',
-                _idProps: [''],
+                _idProps: ['title', 'url', 'source'],
                 endPointNames: ['searchGoogle'],
                 errorHandlerName: 'handleGoogleError',
                 responseParserName: 'parseGoogleResponse',
                 totalPagesGetterName: 'getTotalPages',
-                currentPageGetterName: 'getCurrentPage',
-                schemaMapper: [{ poster_url: 'poster_path' }, { adult: 'adult' }, { overview: 'overview' }, { release_date: 'release_date' }, { genres: 'genre_ids' }, { id: 'id' },
-                { media_type: 'media_type' }, { title: 'title' }, { rating_count: 'vote_count' }, { video: 'video' }, { language: 'original_language' }, { rating: 'vote_average' },]    
+                nextPageGetterName: 'getNextPage',
+                currentPageGetterName: 'getCurrentPage',       
+                schemaMapper: [{ image_url: ['pagemap', 'cse_image', 'src'] }, { description: 'snippet' }, 
+                    { title: 'title' }, { has_video: 'video' }, { thumbnail_url: ['pagemap', 'cse_thumbnail', 'src'] }, { video_url: ['videoobject', 'url']}, {'display_url': 'displayLink'}, {'url': 'link'}]
             },
         ]
     }

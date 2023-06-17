@@ -3,8 +3,13 @@ import os from 'node:os';
 import APICategories from "./data/api_categories.js";
 
 
-const query = 'avatar';
+const query = 'milk';
 //const numThreads = os.availableParallelism();
+let found = false;
+ setTimeout(() => {
+ process.exit(1);
+}, 3 * 60 * 1000);
+
 
 
 const apiWorkerPools = {};
@@ -64,6 +69,7 @@ for (const category of APICategories) {
     const totalPagesGetterName = api.totalPagesGetterName;
 
     const currentPageGetterName = api.currentPageGetterName;
+    const nextPageGetterName = api.nextPageGetterName;
     const schemaMapper = api.schemaMapper;
   
     for(const endPointName of api.endPointNames){
@@ -80,7 +86,9 @@ for (const category of APICategories) {
         _idProps,
         totalPagesGetterName,
         currentPageGetterName,
-        schemaMapper
+        nextPageGetterName,
+        schemaMapper,
+        found,  
       }
 
 

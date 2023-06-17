@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { MovieSchema } from "./category_schemas.js";
+import { GoogleSchema, MovieSchema } from "./category_schemas.js";
 
 
 const {Schema} = mongoose;
@@ -17,11 +17,8 @@ const ReevItemSchema = new Schema({
     searchPhrase: String,
     itemInfo: {
         type: Schema.Types.Mixed,
-        enum: [MovieSchema, ]
-    }
-
-
-    
+        enum: [MovieSchema, GoogleSchema]
+    }   
 });
 
 const MongooseConnection = mongoose.connect(process.env.MONGODB_URI, {

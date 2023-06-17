@@ -27,7 +27,10 @@ if (!isMainThread) {
       _idProps,
       totalPagesGetterName,
       currentPageGetterName,
-      schemaMapper
+      nextPageGetterName,
+      schemaMapper,
+      found,
+
     } = task;
 
     
@@ -52,18 +55,28 @@ if (!isMainThread) {
     const apiInstance = new Api(apiKey, baseUrl, query);
 
     //initialise endpoint handler
-    const endPointHandler = new EndPointHandler(apiInstance, endPointName, errorHandlerName, responseParserName, totalPagesGetterName, currentPageGetterName, schemaMapper, responseListener, doneListener);
+    const endPointHandler = new EndPointHandler(apiInstance, endPointName, errorHandlerName, responseParserName, totalPagesGetterName, currentPageGetterName, responseListener, doneListener);
 
     //listen for responses from endpoint handler
-    async function responseListener(data) {
+    async function responseListener(response) {
       //save response to db;
       
-      if(data) {
+      if(response) {
+        const data = apiInstance[responseParserName](response);
         try{
-          const {current_page, total_pages} = await saveResponse(data, ReevItemSchema, MongooseConnection, _idProps, dbItemProps, phraseCacheInstance);
+          const {current_page, total_pages} = await saveResponse(data, ReevItemSchema, MongooseConnection, _idProps, dbItemProps, phraseCacheInstance, schemaMapper);
           if(current_page){
-            //might create specific saving status codes to be handled by the 'saved' event handler
-            endPointHandler.emit('saved', current_page, total_pages)
+            //Check if there are more pages to get
+            if(current_page <= total_pages){
+              const nextPage = apiInstance[nextPageGetterName](response);
+              endPointHandler.emit('saved', nextPage, total_pages);
+            }
+            else{
+              //close the worker thread
+              // parentPort.emit('done', 'completed sucessfully');
+              // parentPort.close();
+            }
+                 
           }
         }
         catch(error){
@@ -81,9 +94,9 @@ if (!isMainThread) {
     }
 
     try {
-      //get cache
+      //get cache of the request for a given phrase and endpoint
       const cache = await getPhraseCache(phraseCacheInstance, endPointName, apiName, query);
-      const lastPageQueried = cache?.cachedPhrases.get(query).lastPageQueried;
+      const lastPageQueried = cache?.cachedPhrases.get(query).lastPageQueried || 0;
       console.log('lastPageQueried', lastPageQueried)
       const totalPages = cache?.cachedPhrases.get(query).totalPages || 5;
       console.log('totalPages', totalPages)
@@ -106,6 +119,6 @@ if (!isMainThread) {
 
   
 } else {
-  console.log('This code is running in the main thread');
+  console.log('This code is running in the main thread and will never get executed in a worker thread');
 }
 

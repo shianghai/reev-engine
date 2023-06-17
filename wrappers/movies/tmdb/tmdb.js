@@ -53,9 +53,8 @@ class Tmdb extends BaseApi{
     }
 
     async searchMovie(page){
-
         try {
-            const url = `/search/movie?api_key=${this.apiKey}&language=en-US&query=${this.query}&page=${page}&include_adult=false`;
+            const url = `/search/movie?api_key=${this.apiKey}&language=en-US&query=${this.query}&page=${page}&include_adult=true`;
             const response = await super.makeRequest(url);
             return response;            
         }
@@ -163,6 +162,13 @@ class Tmdb extends BaseApi{
             return response.total_pages;
         }
         else return 5;
+    }
+
+    getNextPage(response){
+        if(response.results.length > 0){
+            return response.page + 1;
+        }
+        else return null;
     }
 }
 
