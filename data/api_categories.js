@@ -48,27 +48,27 @@
 */
 
 const APICategories = [
-    // {
-    //     name: 'movies',
-    //     apiList: [
-    //         {
+    {
+         name: 'movies',
+        apiList: [
+             {
     
-    //             name: 'Tmdb',
-    //             apiKey: "bf033f5de51a929c626fe72f84ffb84d",
-    //             baseUrl: 'https://api.themoviedb.org/3',
-    //             _idProps: ['title', 'id', 'category', 'source'],
-    //             modulePath: '../wrappers/movies/tmdb/tmdb.js',
-    //             endPointNames: ['searchMovie', 'searchTvShow', 'searchPeople',],
-    //             errorHandlerName: 'handleTmdbError',
-    //             responseParserName: 'parseTmdbResponse',
-    //             totalPagesGetterName: 'getTotalPagesNumber',
-    //             currentPageGetterName: 'getCurrentPageNumber',
-    //             schemaMapper: [{image_url: 'poster_path'}, {is_adult: 'adult'},{description: 'overview'},{release_date: 'release_date'},{genres: 'genre_ids'},{id: 'id'},
-    //                 {media_type: 'media_type'},{title: 'title'},{rating_count: 'vote_count'},{has_video: 'video'},{language: 'original_language'},{ rating: 'vote_average'},]
+                 name: 'Tmdb',
+                 apiKey: "bf033f5de51a929c626fe72f84ffb84d",
+                 baseUrl: 'https://api.themoviedb.org/3',
+                 _idProps: ['title', 'id', 'category', 'source'],
+                 modulePath: '../wrappers/movies/tmdb/tmdb.js',
+                 endPointNames: ['searchMovie', 'searchTvShow', 'searchPeople',],
+                 errorHandlerName: 'handleTmdbError',
+                 responseParserName: 'parseTmdbResponse',
+                 totalPagesGetterName: 'getTotalPagesNumber',
+                 currentPageGetterName: 'getCurrentPageNumber',
+                 schemaMapper: [{image_url: 'poster_path'}, {is_adult: 'adult'},{description: 'overview'},{release_date: 'release_date'},{genres: 'genre_ids'},{id: 'id'},
+                     {media_type: 'media_type'},{title: 'title'},{rating_count: 'vote_count'},{has_video: 'video'},{language: 'original_language'},{ rating: 'vote_average'},]
                               
-    //         },
-    //     ]
-    // },
+             },
+         ]
+     },
     {
         name: 'Google',
         apiList: [
